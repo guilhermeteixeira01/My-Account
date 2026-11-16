@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1f5c46">
+<title>Minhas Contas</title>
+<meta name="description" content="Organize suas contas, acompanhe metas e saiba para onde vai seu dinheiro.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231f5c46'/%3E%3Crect x='5' y='7' width='14' height='11' rx='2' fill='none' stroke='white' stroke-width='1.8'/%3E%3Cpath d='M5 11h14' stroke='white' stroke-width='1.8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+<div class="wrap">
+    <header class="top">
+      <div class="brand">
+        <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 10h18M8 15h3"/></svg></div>
+        <div><h1>Minhas Contas</h1><p class="sync" id="sync"><i></i><span>Carregando…</span></p></div>
+      </div>
+      <div class="month-nav">
+        <button id="prevM" aria-label="Mês anterior"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg></button>
+        <div class="month-label" id="monthLabel"></div>
+        <button id="nextM" aria-label="Próximo mês"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 18 6-6-6-6"/></svg></button>
+        <button class="today" id="todayM">Hoje</button>
+      </div>
+      <div class="actions">
+        <button class="btn" id="csvBtn" title="Baixa as contas do mês em CSV (abre no Excel/Sheets)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>CSV</button>
+        <button class="btn primary" id="addBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>Nova conta</button>
+        <div class="user" id="userBox">
+          <button class="user-btn more" id="userBtn" aria-haspopup="true" aria-expanded="false" aria-label="Mais opções" title="Backup e opções">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+          <div class="menu" id="userMenu" hidden>
+            <div class="menu-h"><b>Seus dados</b><small>Ficam salvos só neste navegador. Faça backup de vez em quando.</small></div>
+            <button data-menu="export"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Baixar backup (.json)</button>
+            <button data-menu="import"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 0L8 7m4-4 4 4M5 21h14"/></svg>Restaurar backup…</button>
+            <div class="menu-sep"></div>
+            <button data-menu="clear" class="danger"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>Apagar todos os dados</button>
+          </div>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+    </header>
+  
+    <section class="kpis" id="kpis"></section>
+  
+    <section class="card metas">
+      <div class="card-h"><h2 id="metasTitle">Metas do ano</h2>
+        <button class="btn sm" id="addMeta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>Nova meta</button></div>
+      <div id="metasBody"></div>
+    </section>
+  
+    <div class="grid">
+      <div class="card">
+        <div class="card-h"><h2>Lançamentos do mês</h2><span class="muted" id="countLbl"></span></div>
+        <div class="toolbar">
+          <div class="search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="q" placeholder="Buscar conta…" autocomplete="off">
+          </div>
+          <div class="seg" id="fTipo">
+            <button data-v="all" class="on">Tudo</button><button data-v="despesa">Despesas</button><button data-v="receita">Receitas</button>
+          </div>
+          <div class="seg" id="fStatus">
+            <button data-v="all" class="on">Todos</button><button data-v="aberto">Em aberto</button><button data-v="pago">Pagos</button><button data-v="atrasada">Atrasados</button>
+          </div>
+          <select class="sel" id="fCat"><option value="all">Todas categorias</option></select>
+        </div>
+        <div class="tbl-wrap" id="tblWrap"><div class="loading">Carregando suas contas…</div></div>
+      </div>
+  
+      <aside class="side">
+        <div class="card">
+          <div class="card-h"><h2>Gastos por categoria</h2></div>
+          <div class="card-b" id="cats"></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h2>Próximos vencimentos</h2></div>
+          <div class="card-b" id="upcoming"></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h2>Últimos 6 meses</h2></div>
+          <div class="card-b"><div class="trend" id="trend"></div>
+            <div class="legend"><span><i class="dot" style="background:var(--green)"></i>Receitas</span><span><i class="dot" style="background:var(--red)"></i>Despesas</span></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: conta -->
+<div class="overlay" id="ovForm">
+  <form class="modal" id="form" novalidate>
+    <div class="modal-h"><h3 id="formTitle">Nova conta</h3><button type="button" class="icon-btn" data-close aria-label="Fechar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-b">
+      <div class="typesw" id="typeSw"><button type="button" class="d on" data-v="despesa">↓ Despesa</button><button type="button" class="r" data-v="receita">↑ Receita</button></div>
+      <div class="field"><label for="fDesc">Descrição</label><input id="fDesc" placeholder="Ex.: Aluguel, Internet, Salário…" maxlength="80"></div>
+      <div class="row2">
+        <div class="field"><label for="fVal">Valor (R$)</label><input id="fVal" inputmode="decimal" placeholder="0,00" class="num"></div>
+        <div class="field"><label for="fCatSel">Categoria</label><select id="fCatSel"></select></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="fFreq">Frequência</label>
+          <select id="fFreq"><option value="unica">Única</option><option value="mensal">Mensal (fixa)</option><option value="parcelada">Parcelada</option></select></div>
+        <div class="field"><label for="fData" id="fDataLbl">Vencimento</label><input id="fData" type="date"></div>
+      </div>
+      <div class="field" id="fimBox" style="display:none"><label for="fFimMes">Repetir até</label>
+        <div class="fimrow"><select id="fFimMes"></select><select id="fFimAno"></select></div>
+        <div class="hint" id="fimHint"></div></div>
+      <div class="field" id="parcBox" style="display:none"><label for="fParc">Número de parcelas</label><input id="fParc" type="number" min="2" max="120" value="12"><div class="hint" id="parcHint"></div></div>
+      <div class="field"><label for="fObs">Observação <span class="muted">(opcional)</span></label><textarea id="fObs" maxlength="200" placeholder="Código de barras, forma de pagamento…"></textarea></div>
+      <div class="err" id="formErr"></div>
+    </div>
+    <div class="modal-f"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="submit" class="btn primary">Salvar</button></div>
+  </form>
+</div>
+
+<!-- Modal: meta -->
+<div class="overlay" id="ovMeta">
+  <form class="modal" id="formMeta" novalidate>
+    <div class="modal-h"><h3 id="metaTitle">Nova meta</h3><button type="button" class="icon-btn" data-close aria-label="Fechar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-b">
+      <div class="field"><label for="mTipo">Tipo de meta</label>
+        <select id="mTipo">
+          <option value="economia">💰 Economizar no ano (calculado pelas suas contas)</option>
+          <option value="limite">🚦 Limite de gasto em uma categoria</option>
+          <option value="objetivo">🎯 Juntar dinheiro para um objetivo</option>
+        </select><div class="hint" id="mTipoHint"></div></div>
+      <div class="field"><label for="mNome">Nome da meta</label><input id="mNome" maxlength="60" placeholder="Ex.: Reserva de emergência"></div>
+      <div class="row2">
+        <div class="field"><label for="mAlvo" id="mAlvoLbl">Valor da meta (R$)</label><input id="mAlvo" inputmode="decimal" class="num" placeholder="0,00"></div>
+        <div class="field"><label for="mAno">Ano</label><select id="mAno"></select></div>
+      </div>
+      <div class="field" id="mCatBox" style="display:none"><label for="mCat">Categoria</label><select id="mCat"></select></div>
+      <div class="field" id="mGuardBox" style="display:none"><label for="mGuard">Já guardado (R$)</label><input id="mGuard" inputmode="decimal" class="num" placeholder="0,00"></div>
+      <div class="err" id="metaErr"></div>
+    </div>
+    <div class="modal-f"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="submit" class="btn primary">Salvar meta</button></div>
+  </form>
+</div>
+
+<!-- Modal: aporte -->
+<div class="overlay" id="ovAporte">
+  <form class="modal" id="formAporte" novalidate style="max-width:400px">
+    <div class="modal-h"><h3 id="aporteTitle">Guardar dinheiro</h3></div>
+    <div class="modal-b">
+      <div class="field"><label for="aVal">Valor (R$)</label><input id="aVal" inputmode="decimal" class="num" placeholder="0,00"><div class="hint">Use um valor negativo (ex.: -200) para registrar uma retirada.</div></div>
+      <div class="err" id="aporteErr"></div>
+    </div>
+    <div class="modal-f"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="submit" class="btn primary">Adicionar</button></div>
+  </form>
+</div>
+
+<!-- Modal: confirmar -->
+<div class="overlay" id="ovConfirm">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-h"><h3 id="cTitle">Excluir</h3></div>
+    <div class="modal-b"><p id="cText" style="margin:0;color:var(--ink-2)"></p></div>
+    <div class="modal-f" id="cBtns"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
